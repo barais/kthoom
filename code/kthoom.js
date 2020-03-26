@@ -58,6 +58,34 @@ class KthoomApp {
     /** @private {Menu} */
     this.viewerContextMenu_ = null;
 
+    /** @private {Swipe} */
+    this.swipeStartX_ = 0;
+
+    /** @private {Swipe} */
+    this.swipeStartY_ = 0;
+
+    /** @private {Swipe} */
+    this.swipeDist_ = 0;
+
+    /** @private {Swipe} */
+    this.swipeThreshold_ = 150; //required min distance traveled to be considered swipe
+
+    /** @private {Swipe} */
+    this.swipeAllowedTime_ = 500; // maximum time allowed to travel that distance
+
+    /** @private {Swipe} */
+    this.swipeElapsedTime_;
+
+    /** @private {Swipe} */
+    this.swipeStartTime_;
+
+    /** @private {Swipe} */
+    this.swipeMode_ = false;
+
+    /** @private {Swipe} */
+    this.swipeScrollY_ = 0;
+
+
     // This Promise resolves when kthoom is ready.
     this.initializedPromise_ = new Promise((resolve, reject) => {
       // This Promise resolves when the DOM is ready.
@@ -96,6 +124,7 @@ class KthoomApp {
     this.initResizeHandler_();
     this.initWheelScroll_();
     this.initUnloadHandler_();
+    this.initTouchSwipe_();
 
     document.addEventListener('keydown', (e) => this.keyHandler_(e), false);
 
@@ -214,6 +243,57 @@ class KthoomApp {
       swallowEvent(e);
       this.loadLocalFiles_({target: e.dataTransfer});
     });
+  }
+
+  initTouchSwipe_(){
+         
+    document.addEventListener('touchstart', e=>{
+        var touchobj = e.changedTouches[0];
+        this.swipeDist_ = 0;
+        this.swipeStartX_ = touchobj.pageX;
+        this.swipeStartY_ = touchobj.pageY;
+        this.swipeStartTime_ = new Date().getTime(); // record time when finger first makes contact with surface
+        this.swipeMode_ = true;
+        this.swipeScrollY_ = window.scrollY;
+//        e.preventDefault();
+    })
+ 
+    document.addEventListener('touchmove', e=>{
+      if (this.swipeMode_) {
+//        e.preventDefault(); // prevent scrolling when inside DIV
+      }
+    })
+ 
+    document.addEventListener('touchend',  e=>{
+        var touchobj = e.changedTouches[0]
+        this.swipeDist_ = touchobj.pageX - this.swipeStartX_ // get total dist traveled by finger while in contact with surface
+        this.swipeElapsedTime_ = new Date().getTime() - this.swipeStartTime_ // get time elapsed
+        // check that elapsed time is within specified, horizontal dist traveled >= threshold, and vertical dist traveled <= 100
+        
+        var swiperightBol = (this.swipeElapsedTime_ <= this.swipeAllowedTime_ && Math.abs(this.swipeDist_) >= this.swipeThreshold_ && Math.abs(touchobj.pageY - this.swipeStartY_) <= 100)
+        var swipetopBol = (this.swipeElapsedTime_ <= this.swipeAllowedTime_ && Math.abs(touchobj.pageY - this.swipeStartY_) >= this.swipeThreshold_ && Math.abs(touchobj.pageX - this.swipeStartX_) <= 100)
+//        var swiperightBol = (this.swipeElapsedTime_ <= this.swipeAllowedTime_ && this.swipeDist_ >= this.swipeThreshold_ && Math.abs(touchobj.pageY - this.swipeStartY_) <= 100)
+        // Call function
+
+        var docHeight = Math.max(
+          document.body.scrollHeight, document.documentElement.scrollHeight,
+          document.body.offsetHeight, document.documentElement.offsetHeight,
+          document.body.clientHeight, document.documentElement.clientHeight
+      );
+        if (swiperightBol &&  this.swipeDist_ >= 0) {
+          this.showPrevPage();
+        } else if (swiperightBol &&  this.swipeDist_ < 0) {
+          this.showNextPage();
+        } else if (swipetopBol && (touchobj.pageY - this.swipeStartY_) >= 0 && 
+        Math.abs(this.swipeScrollY_ - window.scrollY) < 50 && window.scrollY == 0){
+          this.showPrevPage();
+        } else if (swipetopBol && (touchobj.pageY - this.swipeStartY_) < 0 && 
+        Math.abs(this.swipeScrollY_ - window.scrollY) < 50 && (window.scrollY + window.innerHeight) == docHeight){
+          this.showNextPage();
+        }
+        this.swipeMode_ = false;
+
+    })
   }
 
   /** @private */
