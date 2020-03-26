@@ -88,7 +88,7 @@ export class ComicBookBinder extends BookBinder {
           return this.pagePromises_[pageNum]
             .then(page => pages.push(page))
             .catch(e => {
-              console.error(`Error creating page: ${e}`);
+//              console.error(`Error creating page: ${e}`);
               foundError = true;
             })
             .finally(() => true);

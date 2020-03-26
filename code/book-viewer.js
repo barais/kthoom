@@ -78,7 +78,7 @@ export class BookViewer {
       return;
     }
 
-    evt.preventDefault();
+    // evt.preventDefault();
 
     // Keep the timer going if it has been started.
     if (this.wheelTimer_) {

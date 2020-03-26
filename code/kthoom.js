@@ -389,7 +389,7 @@ class KthoomApp {
         }
         target = target.parentElement;
       }
-      evt.preventDefault();
+//      evt.preventDefault();
     }, true);
   }
 

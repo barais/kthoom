@@ -235,11 +235,6 @@ class RarVolumeHeader {
 
         break;
       case ENDARC_HEAD:
-        if (logToConsole) {
-          console.log('Found an ENDARC_HEAD');
-        }
-        // skip the rest of the header bytes (for now)
-        bstream.readBytes(this.headSize - 7);
         break;
       default:
         if (logToConsole) {
