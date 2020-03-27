@@ -25,9 +25,7 @@ var urlsToCache = [
   'images/logo.svg',
   'index.html',
   'kthoom.webmanifest',
-  'service-worker.js',
-  'code/epub-book-binder.js',
-  'code/comic-book-binder.js'
+  'service-worker.js'
 ];
 
 self.addEventListener('install', async event => {
