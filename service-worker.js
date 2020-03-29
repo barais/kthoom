@@ -1,9 +1,12 @@
-var cacheName = 'kthoom';
-var urlsToCache = [
+const cacheName = 'kthoom';
+let urlsToCache = [
   '.',
   'code/bitjs/archive/archive.js',
   'code/bitjs/file/sniffer.js',
   'code/bitjs/image/webp-shim/webp-shim.js',
+  'code/bitjs/archive/unzip.js',
+  'code/bitjs/archive/unrar.js',
+  'code/bitjs/archive/untar.js',
   'code/book-binder.js',
   'code/book-events.js',
   'code/book-viewer.js',
@@ -24,30 +27,25 @@ var urlsToCache = [
   'images/logo.png',
   'images/logo.svg',
   'index.html',
+  'privacy.html',
   'kthoom.webmanifest',
   'service-worker.js'
 ];
 
 self.addEventListener('install', async event => {
-  console.log('install event')
   event.waitUntil(
     caches.open(cacheName)
-    .then(function (cache) {
+    .then( (cache) => {
       return cache.addAll(urlsToCache);
     })
   );
-
 });
 
 self.addEventListener('fetch', async e => {
-  console.log('[Service Worker] Fetched resource ' + e.request.url);
-
   e.respondWith(
     caches.match(e.request).then((r) => {
-      //              console.log('[Service Worker] Fetching resource: '+e.request.url);
       return r || fetch(e.request).then((response) => {
         return caches.open(cacheName).then((cache) => {
-          //              console.log('[Service Worker] Caching new resource: '+e.request.url);
           cache.put(e.request, response.clone());
           return response;
         });
